@@ -1,4 +1,4 @@
-const debug = require("debug")("signalk:signalk-perf-to-api");
+const debug = require("debug")("signalk:signalk-engine-state");
 
 /*
 
@@ -12,12 +12,10 @@ TODO:
 
 */
 
-
-module.exports = function(app) => {
+module.exports = function(app) {
     const plugin = {};
-    let unsubscribes = [];
 
-    plugin.id = 'signalk-engine-state';
+    plugin.id = 'sk-engine-state';
     plugin.name = 'Engine state';
     plugin.description = 'Sets engine state on a switch status';
     plugin.schema = {
@@ -25,11 +23,6 @@ module.exports = function(app) => {
 	title: "Sailboat engine status",
 	description: "Sets engine state",
 	properties: {
-	    engine_path: {
-		type: 'string',
-		default: 'propulsion.main.state',
-		title: 'Path used for checking engine state',
-	    },
 	    engine_state: {
 		type: 'string',
 		title: 'Engine state',
@@ -40,18 +33,9 @@ module.exports = function(app) => {
     }
 
     const setStatus = app.setPluginStatus || app.setProviderStatus;
+    const engineStatePath='propulsion.main.state';
 
-    plugin.start = function (options) => {
-	const enginePath = options.engine_path || 'propulsion.main.state';
-	const subscription = {
-	    context: 'vessels.self',
-	    subscribe: [
-		{
-		    path: enginePath,
-		    period: 1000,
-		}
-	    ],
-	};
+    plugin.start = function (options) {
 
 	function setState(state) {
 	    app.handleMessage(plugin.id, {
@@ -60,62 +44,25 @@ module.exports = function(app) => {
 		    {
 			source: {
 			    label: plugin.id,
+			    talker: 'PG'
 			},
 			timestamp: (new Date().toISOString()),
 			values: [
 			    {
-				path: options.engine_path || 'propulsion.main.state',
-				value: state,
+				path: engineStatePath,
+				value: state
 			    },
 			],
 		    },
 		],
 	    });
-	    setStatus(`Detected engine state: ${state}`);
 	}
 
-	app.subscriptionmanager.subscribe(
-	    subscription,
-	    unsubscribes,
-	    (subscriptionError) => {
-		app.error(`Error:${subscriptionError}`);
-	    },
-	    (delta) => {
-		if (!delta.updates) {
-		    return;
-		}
-		delta.updates.forEach((u) => {
-		    if (!u.values) {
-			return;
-		    }
-		    u.values.forEach((v) => {
-			if (v.path === powerPath && !options.use_chargingmode) {
-			    if (v.value > 0) {
-				setState('started');
-				return;
-			    }
-			    setState('stopped');
-			} else if (v.path === modePath && options.use_chargingmode) {
-			    if (v.value == null) {
-				return;
-			    }
-			    if (v.value === 'off' || v.value === 'OFF') {
-				setState('stopped');
-				return;
-			    }
-			    setState('started');
-			}
-		    });
-		});
-	    },
-	);
-	
-	setStatus('Waiting for updates');
+	setState(options.engine_state);
+	app.debug(`engine state change : ${options.engine_state}`);
     };
 
     plugin.stop = () => {
-	unsubscribes.forEach((f) => f());
-	unsubscribes = [];
     };
 
     return plugin;
