@@ -1,0 +1,31 @@
+{
+   "name": "signalk-engine-state",
+   "version": "0.1.0",
+   "description": "Plugin to check engine state when button pressed",
+   "main": "index.js",
+   "scripts": {
+      "changelog": "github-changes -o benoit-jpi -r signalk-engine-state -a --only-pulls --use-commit-body --data=pulls  --tag-name=v$npm_package_version",
+      "test": "mocha"
+   },
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/benoit-jpi/signalk-engine-state.git"
+   },
+   "keywords": [
+      "signalk-node-server-plugin",
+      "signalk-category-utility"
+   ],
+   "author": "Jean-Pierre Benoit",
+   "license": "ISC",
+   "bugs": {
+      "url": "https://github.com/benoit-jpi/signalk-engine-state/issues"
+   },
+   "homepage": "https://github.com/benoit-jpi/signalk-engine-state#readme",
+   "dependencies": {
+      "mocha": "^11.1.0"
+   },
+   "devDependencies": {},
+   "publishConfig": {
+      "access": "public"
+   }
+}
