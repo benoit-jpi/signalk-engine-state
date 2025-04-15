@@ -1,6 +1,6 @@
 # signalk-engine-state
 
-Detect whether engine is running based on a physical switch state.
+Set the engine state based on a switch state.
 
 Engine running state is useful especially to record performance data and creating polar tables, e.g.
 
